@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../lib/firebase';
 import { collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
@@ -168,6 +168,57 @@ export default function AdminDashboard() {
       return () => { unsubContent(); unsubGames(); unsubPayments(); unsubFeatures(); unsubTestimonials(); unsubArticles(); };
     }
   }, [user]);
+
+  const handleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (e) {
+      console.error(e);
+      alert('Login failed. Ensure Firebase Auth is active.');
+    }
+  };
+
+  const handleSaveContent = async () => {
+    setIsSaving(true);
+    try {
+      await setDoc(doc(db, 'site_content', 'landing'), siteContent || {}, { merge: true });
+      showSuccess('Konten berhasil disimpan!');
+    } catch (e: any) {
+      if (e?.code === 'permission-denied') {
+        showError('Gagal menyimpan: Akses ditolak. Pastikan Anda memiliki hak akses admin.', e);
+      } else {
+        showError('Gagal menyimpan konten: ' + (e?.message || 'Error tidak diketahui'), e);
+      }
+    }
+    setIsSaving(false);
+  };
+
+  const addGame = async () => {
+    try {
+      await addDoc(collection(db, 'games'), { name: 'New Game', tags: 'Tags', img: '' });
+      showSuccess('Game berhasil ditambahkan!');
+    } catch (e: any) {
+      showError('Gagal menambahkan game: ' + (e?.message || 'Error tidak diketahui'), e);
+    }
+  };
+
+  const updateGame = async (id: string, field: string, val: string) => {
+    try {
+      await updateDoc(doc(db, 'games', id), { [field]: val });
+    } catch (e: any) {
+      showError('Gagal memperbarui game: ' + (e?.message || 'Error tidak diketahui'), e);
+    }
+  };
+
+  const deleteGame = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus game ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'games', id));
+      showSuccess('Game berhasil dihapus!');
+    } catch (e: any) {
+      showError('Gagal menghapus game: ' + (e?.message || 'Error tidak diketahui'), e);
+    }
+  };
 
   const addArticle = async () => {
     try {
