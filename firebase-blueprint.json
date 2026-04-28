@@ -1,0 +1,120 @@
+{
+  "entities": {
+    "HeaderContent": {
+      "title": "HeaderContent",
+      "description": "Content for the site header",
+      "type": "object",
+      "properties": {
+        "logoText": { "type": "string" },
+        "logoSubText": { "type": "string" }
+      },
+      "required": ["logoText", "logoSubText"]
+    },
+    "HeroContent": {
+      "title": "HeroContent",
+      "description": "Content for the hero section",
+      "type": "object",
+      "properties": {
+        "titlePrefix": { "type": "string" },
+        "titleMain": { "type": "string" },
+        "titleHighlight": { "type": "string" },
+        "description": { "type": "string" },
+        "oldPrice": { "type": "string" },
+        "newPrice": { "type": "string" },
+        "buttonText": { "type": "string" },
+        "tagline": { "type": "string" },
+        "imageSrc": { "type": "string" }
+      },
+      "required": ["titleMain", "description", "newPrice", "buttonText"]
+    },
+    "PopularGame": {
+      "title": "PopularGame",
+      "description": "A popular game for top-up",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "tags": { "type": "string" },
+        "img": { "type": "string" }
+      },
+      "required": ["name", "tags", "img"]
+    },
+    "SiteFeature": {
+      "title": "SiteFeature",
+      "description": "Why choose us feature",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "desc": { "type": "string" },
+        "iconName": { "type": "string" }
+      },
+      "required": ["title", "desc", "iconName"]
+    },
+    "FooterContent": {
+      "title": "FooterContent",
+      "description": "Content for the footer",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "phone": { "type": "string" },
+        "copyright": { "type": "string" }
+      },
+      "required": ["description", "phone", "copyright"]
+    },
+    "PaymentMethod": {
+      "title": "PaymentMethod",
+      "description": "Name of a payment method",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "img": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Basic user information",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "role", "createdAt", "updatedAt"]
+    },
+    "LandingPageContent": {
+      "title": "LandingPageContent",
+      "description": "Complete content for the landing page",
+      "type": "object",
+      "properties": {
+        "header": { "$ref": "#/entities/HeaderContent" },
+        "hero": { "$ref": "#/entities/HeroContent" },
+        "footer": { "$ref": "#/entities/FooterContent" }
+      },
+      "required": ["header", "hero", "footer"]
+    }
+  },
+  "firestore": {
+    "site_content/{contentId}": {
+      "schema": "#/entities/LandingPageContent",
+      "description": "Site content settings"
+    },
+    "games/{gameId}": {
+      "schema": "#/entities/PopularGame",
+      "description": "List of popular games"
+    },
+    "features/{featureId}": {
+      "schema": "#/entities/SiteFeature",
+      "description": "List of features"
+    },
+    "payment_methods/{methodId}": {
+      "schema": "#/entities/PaymentMethod",
+      "description": "List of payment methods"
+    },
+    "users/{userId}": {
+      "schema": "#/entities/UserProfile",
+      "description": "User profiles"
+    }
+  }
+}

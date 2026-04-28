@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() {
+      return request.resource.data;
+    }
+    
+    function existing() {
+      return resource.data;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'masroficom@gmail.com';
+    }
+    
+    match /site_content/{contentId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(contentId);
+    }
+    
+    match /games/{gameId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(gameId);
+    }
+    
+    match /features/{featureId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(featureId);
+    }
+    
+    match /payment_methods/{methodId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(methodId);
+    }
+    
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId);
+      allow create: if isSignedIn() && request.auth.uid == userId 
+                    && incoming().keys().hasAll(['email', 'displayName', 'role', 'createdAt', 'updatedAt'])
+                    && incoming().email is string && incoming().email.size() <= 200
+                    && incoming().displayName is string && incoming().displayName.size() <= 100
+                    && incoming().role is string && incoming().role == 'user'
+                    && incoming().createdAt == request.time
+                    && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && request.auth.uid == userId
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt'])
+                    && incoming().displayName is string && incoming().displayName.size() <= 100
+                    && incoming().updatedAt == request.time;
+      allow delete: if false; // Only admins or support should delete users
+    }
+  }
+}
