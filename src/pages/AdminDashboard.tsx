@@ -584,6 +584,10 @@ export default function AdminDashboard() {
                   <label className="block text-sm font-medium text-gray-400 mb-2">TikTok URL</label>
                   <input placeholder="https://tiktok.com/..." type="text" value={siteContent?.footer?.socialTt || ''} onChange={e => setSiteContent({ ...siteContent, footer: { ...siteContent?.footer, socialTt: e.target.value }})} className="w-full bg-charcoal border border-white/10 rounded-lg px-4 py-2 text-white focus:border-gold outline-none" />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">YouTube URL</label>
+                  <input placeholder="https://youtube.com/..." type="text" value={siteContent?.footer?.socialYt || ''} onChange={e => setSiteContent({ ...siteContent, footer: { ...siteContent?.footer, socialYt: e.target.value }})} className="w-full bg-charcoal border border-white/10 rounded-lg px-4 py-2 text-white focus:border-gold outline-none" />
+                </div>
               </div>
             )}
 

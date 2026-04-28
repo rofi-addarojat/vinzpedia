@@ -1,4 +1,4 @@
-import { Search, HeadphonesIcon, HelpCircle, Zap, ShieldCheck, Tag, CreditCard, Menu, X, ChevronRight, Phone, Star, Activity, Users, Clock, ThumbsUp, Instagram, Facebook } from 'lucide-react';
+import { Search, HeadphonesIcon, HelpCircle, Zap, ShieldCheck, Tag, CreditCard, Menu, X, ChevronRight, Phone, Star, Activity, Users, Clock, ThumbsUp, Instagram, Facebook, Youtube } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
@@ -115,6 +115,7 @@ export default function LandingPage() {
   const socialIg = siteContent?.footer?.socialIg || '#';
   const socialFb = siteContent?.footer?.socialFb || '#';
   const socialTt = siteContent?.footer?.socialTt || '#';
+  const socialYt = siteContent?.footer?.socialYt || '#';
 
   const handleGameClick = (gameName: string) => {
     const text = encodeURIComponent(`Halo Admin ${logoText}, saya ingin order top-up game ${gameName}`);
@@ -581,6 +582,9 @@ export default function LandingPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v3a3 3 0 0 1-3-3v8a4 4 0 1 1-4-4Z"/>
                 </svg>
+              </a>
+              <a href={socialYt} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
+                <Youtube size={20} />
               </a>
             </div>
           </div>
