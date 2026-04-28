@@ -112,6 +112,14 @@
       "schema": "#/entities/PaymentMethod",
       "description": "List of payment methods"
     },
+    "features/{featureId}": {
+      "schema": "#/entities/Features",
+      "description": "Features"
+    },
+    "testimonials/{testimonialId}": {
+      "schema": "#/entities/Testimonials",
+      "description": "Testimonials"
+    },
     "users/{userId}": {
       "schema": "#/entities/UserProfile",
       "description": "User profiles"

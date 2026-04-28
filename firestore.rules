@@ -40,6 +40,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin() && isValidId(featureId);
     }
     
+    match /testimonials/{testimonialId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(testimonialId);
+    }
+    
     match /payment_methods/{methodId} {
       allow read: if true;
       allow create, update, delete: if isAdmin() && isValidId(methodId);

@@ -48,6 +48,8 @@ export default function LandingPage() {
   const [siteContent, setSiteContent] = useState<any>(null);
   const [games, setGames] = useState<any[]>(defaultPopularGames);
   const [paymentLogos, setPaymentLogos] = useState<any[]>(defaultPaymentLogos);
+  const [featuresList, setFeaturesList] = useState<any[]>(features);
+  const [testimonialsList, setTestimonialsList] = useState<any[]>(testimonials);
   const { user, userProfile } = useAuth();
 
   useEffect(() => {
@@ -69,11 +71,21 @@ export default function LandingPage() {
         setPaymentLogos(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
       }
     });
+
+    const unsubFeatures = onSnapshot(collection(db, 'features'), (snapshot) => {
+      if (!snapshot.empty) setFeaturesList(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+
+    const unsubTestimonials = onSnapshot(collection(db, 'testimonials'), (snapshot) => {
+      if (!snapshot.empty) setTestimonialsList(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
     
     return () => {
       unsubContent();
       unsubGames();
       unsubPayments();
+      unsubFeatures();
+      unsubTestimonials();
     };
   }, []);
 
@@ -82,12 +94,27 @@ export default function LandingPage() {
   const headerPrefix = logoText.substring(0, 4);
   const headerSuffix = logoText.substring(4);
   
-  const heroMain = siteContent?.hero?.titleMain || 'Platform Top-Up Game Terbaik di Indonesia';
+  const heroBadge = siteContent?.hero?.badgeText || 'Top-Up Platform #1 di Indonesia';
+  const heroMain = siteContent?.hero?.titleMain || 'Platform Top-Up Game <span class="text-gold">Terbaik</span> di Indonesia';
   const heroDesc = siteContent?.hero?.description || 'Nikmati pengalaman top-up instan, harga termurah, dan jaminan aman 100%. Mulai perjalanan gaming terbaikmu bersama kami sekarang juga!';
   const heroImageSrc = siteContent?.hero?.imageSrc || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80';
+  const cta1 = siteContent?.hero?.ctaPrimaryText || 'Mulai Top-Up';
+  const cta2 = siteContent?.hero?.ctaSecondaryText || 'Pelajari Fitur';
+
+  const stat1 = { val: siteContent?.hero?.stat1Value || '99%', lbl: siteContent?.hero?.stat1Label || 'Success Rate' };
+  const stat2 = { val: siteContent?.hero?.stat2Value || '1s', lbl: siteContent?.hero?.stat2Label || 'Proses Instan' };
+  const stat3 = { val: siteContent?.hero?.stat3Value || '5M+', lbl: siteContent?.hero?.stat3Label || 'Users Aktif' };
+  const stat4 = { val: siteContent?.hero?.stat4Value || '24/7', lbl: siteContent?.hero?.stat4Label || 'Live Support' };
+
+  const secGames = { sub: siteContent?.gamesSection?.subtitle || 'Katalog Produk', title: siteContent?.gamesSection?.title || 'Pilih Game <span class="text-gold">Favoritmu</span>', desc: siteContent?.gamesSection?.description || 'Ratusan pilihan produk voucher dan top-up untuk berbagai game mobile maupun PC kesayangan Anda.' };
+  const secFeat = { sub: siteContent?.featuresSection?.subtitle || 'Keunggulan KAMI', title: siteContent?.featuresSection?.title || 'Mengapa Harus Top-Up di VindzPedia?', desc: siteContent?.featuresSection?.description || 'Kami berkomitmen memberikan kenyamanan, keamanan, dan kecepatan maksimal dalam melayani setiap transaksi yang Anda lakukan.' };
+  const secTesti = { sub: siteContent?.testimonialsSection?.subtitle || 'Testimoni Pelanggan', title: siteContent?.testimonialsSection?.title || 'Kata Mereka Tentang <span class="text-gold">VinzPedia</span>', desc: siteContent?.testimonialsSection?.description || 'Ribuan gamers telah membuktikan sendiri kecepatan dan kenyamanan bertransaksi di situs kami.' };
   
   const footerDesc = siteContent?.footer?.description || 'Platform Top-Up Game Termurah & Terpercaya. Menyediakan layanan instan untuk berbagai macam kebutuhan gaming Anda.';
   const footerPhone = siteContent?.footer?.phone || '08779110477';
+  const socialIg = siteContent?.footer?.socialIg || '#';
+  const socialFb = siteContent?.footer?.socialFb || '#';
+  const socialTt = siteContent?.footer?.socialTt || '#';
 
   return (
     <div className="min-h-screen bg-[#111111] text-white font-sans overflow-x-hidden selection:bg-gold selection:text-charcoal flex flex-col scroll-smooth">
@@ -203,11 +230,11 @@ export default function LandingPage() {
             <div className="w-full lg:w-[55%] flex flex-col items-center text-center lg:items-start lg:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold text-xs font-bold uppercase tracking-widest mb-6">
                 <span className="w-2 h-2 rounded-full bg-gold animate-pulse shadow-[0_0_8px_rgba(255,215,0,0.8)]"></span>
-                Top-Up Platform #1 di Indonesia
+                {heroBadge}
               </div>
               
               <h1 className="font-heading font-black text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.1] mb-6">
-                <span dangerouslySetInnerHTML={{ __html: heroMain.replace('MLBB', '<span class="text-gold">MLBB</span>').replace('Terbaik', '<span class="text-gold">Terbaik</span>').replace('Indonesia', '<span class="text-gold">Indonesia</span>') }} />
+                <span dangerouslySetInnerHTML={{ __html: heroMain }} />
               </h1>
               
               <p className="text-gray-300 text-base sm:text-lg lg:text-xl leading-relaxed mb-10 max-w-2xl">
@@ -218,30 +245,30 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                 <a href="#games" className="w-full sm:w-auto text-center bg-gold hover:bg-yellow-400 text-charcoal font-extrabold py-4 px-10 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(255,215,0,0.3)] hover:shadow-[0_0_30px_rgba(255,215,0,0.5)] hover:-translate-y-1 text-lg uppercase tracking-wider relative overflow-hidden group">
                   <span className="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
-                  <span className="relative">Mulai Top-Up</span>
+                  <span className="relative">{cta1}</span>
                 </a>
                 <a href="#manfaat" className="w-full sm:w-auto text-center bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-4 px-8 rounded-xl transition-colors text-base uppercase tracking-wider">
-                  Pelajari Fitur
+                  {cta2}
                 </a>
               </div>
 
               {/* 8. TRUST ELEMENTS (Counters Row) */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 w-full pt-12 mt-12 border-t border-white/10">
                 <div className="text-center lg:text-left">
-                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">99<span className="text-gold">%</span></h3>
-                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Success Rate</p>
+                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{stat1.val}</h3>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">{stat1.lbl}</p>
                 </div>
                 <div className="text-center lg:text-left">
-                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">1<span className="text-gold">s</span></h3>
-                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Proses Instan</p>
+                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{stat2.val}</h3>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">{stat2.lbl}</p>
                 </div>
                 <div className="text-center lg:text-left">
-                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">5<span className="text-gold">M+</span></h3>
-                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Users Aktif</p>
+                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{stat3.val}</h3>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">{stat3.lbl}</p>
                 </div>
                 <div className="text-center lg:text-left">
-                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">24<span className="text-gold">/</span>7</h3>
-                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Live Support</p>
+                  <h3 className="text-3xl lg:text-4xl font-black text-white font-heading mb-1 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">{stat4.val}</h3>
+                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest">{stat4.lbl}</p>
                 </div>
               </div>
             </div>
@@ -292,12 +319,12 @@ export default function LandingPage() {
         <section id="games" className="py-24 bg-[#151515] border-b border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16">
-              <span className="text-gold font-bold uppercase tracking-widest text-sm mb-3 block">Katalog Produk</span>
+              <span className="text-gold font-bold uppercase tracking-widest text-sm mb-3 block">{secGames.sub}</span>
               <h2 className="text-4xl md:text-5xl font-heading font-black text-white mb-6">
-                Pilih Game <span className="text-gold">Favoritmu</span>
+                <span dangerouslySetInnerHTML={{ __html: secGames.title }} />
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed">
-                Ratusan pilihan produk voucher dan top-up untuk berbagai game mobile maupun PC kesayangan Anda.
+                {secGames.desc}
               </p>
             </div>
 
@@ -334,18 +361,30 @@ export default function LandingPage() {
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-3xl mx-auto mb-20">
-              <span className="text-gold font-bold uppercase tracking-widest text-sm mb-3 block">Keunggulan KAMI</span>
+              <span className="text-gold font-bold uppercase tracking-widest text-sm mb-3 block">{secFeat.sub}</span>
               <h2 className="text-4xl md:text-5xl font-heading font-black text-white mb-6">
-                Mengapa Harus Top-Up di VindzPedia?
+                <span dangerouslySetInnerHTML={{ __html: secFeat.title }} />
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed">
-                Kami berkomitmen memberikan kenyamanan, keamanan, dan kecepatan maksimal dalam melayani setiap transaksi yang Anda lakukan.
+                {secFeat.desc}
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, idx) => {
-                const Icon = feature.icon;
+              {featuresList.map((feature, idx) => {
+                let Icon = Zap;
+                if (typeof feature.icon === 'string') {
+                  switch (feature.icon.toLowerCase()) {
+                    case 'shield': Icon = ShieldCheck; break;
+                    case 'tag': Icon = Tag; break;
+                    case 'credit-card': Icon = CreditCard; break;
+                    case 'target': Icon = Activity; break;
+                    case 'star': Icon = Star; break;
+                    default: Icon = Zap; break;
+                  }
+                } else if (feature.icon) {
+                  Icon = feature.icon;
+                }
                 return (
                   <div key={idx} className="bg-[#181818] p-8 rounded-[32px] border border-white/5 hover:border-gold/30 hover:bg-[#1C1C1C] transition-all duration-300 group flex flex-col items-start relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-[40px] group-hover:bg-gold/10 transition-colors"></div>
@@ -367,11 +406,11 @@ export default function LandingPage() {
             
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
               <div className="max-w-2xl">
-                <span className="text-gold font-bold uppercase tracking-widest text-sm mb-3 block">Testimoni Pelanggan</span>
+                <span className="text-gold font-bold uppercase tracking-widest text-sm mb-3 block">{secTesti.sub}</span>
                 <h2 className="text-4xl md:text-5xl font-heading font-black text-white mb-4">
-                  Kata Mereka Tentang <span className="text-gold">VinzPedia</span>
+                  <span dangerouslySetInnerHTML={{ __html: secTesti.title }} />
                 </h2>
-                <p className="text-gray-400 text-lg">Ribuan gamers telah membuktikan sendiri kecepatan dan kenyamanan bertransaksi di situs kami.</p>
+                <p className="text-gray-400 text-lg">{secTesti.desc}</p>
               </div>
               <div className="flex gap-2 shrink-0">
                 <div className="flex items-center gap-3 bg-[#222222] px-6 py-4 rounded-2xl border border-white/5 shadow-xl">
@@ -391,8 +430,8 @@ export default function LandingPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((testi, i) => (
-                <div key={i} className="bg-[#1A1A1A] p-8 md:p-10 rounded-[32px] border border-white/5 relative group hover:border-gold/30 hover:bg-[#1E1E1E] transition-all duration-500 hover:-translate-y-2 flex flex-col h-full">
+              {testimonialsList.map((testi, i) => (
+                <div key={testi.id || i} className="bg-[#1A1A1A] p-8 md:p-10 rounded-[32px] border border-white/5 relative group hover:border-gold/30 hover:bg-[#1E1E1E] transition-all duration-500 hover:-translate-y-2 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-8">
                     <div className="flex gap-1 text-gold">
                       {[...Array(testi.rating)].map((_, j) => <Star key={j} className="w-4 h-4 md:w-5 md:h-5 fill-current" />)}
@@ -520,15 +559,15 @@ export default function LandingPage() {
               &copy; {new Date().getFullYear()} <span className="text-white font-bold">{logoText}</span>. All rights reserved.
             </p>
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
+              <a href={socialIg} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
                 <span className="text-sm font-bold">IG</span>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
+              </a>
+              <a href={socialFb} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
                 <span className="text-sm font-bold">FB</span>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
+              </a>
+              <a href={socialTt} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold hover:text-[#0A0A0A] transition-all text-gray-400 cursor-pointer border border-white/5 hover:scale-110">
                 <span className="text-sm font-bold">TT</span>
-              </div>
+              </a>
             </div>
           </div>
         </div>
