@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { db, auth, googleProvider } from '../lib/firebase';
 import { collection, doc, getDoc, setDoc, onSnapshot, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { ShieldCheck, LogOut, Settings, Image as ImageIcon, Gamepad2, CreditCard, Plus, Trash2, CheckCircle2, MessageSquare, LayoutTemplate } from 'lucide-react';
+import { ShieldCheck, LogOut, Settings, Image as ImageIcon, Gamepad2, CreditCard, Plus, Trash2, CheckCircle2, MessageSquare, LayoutTemplate, BookOpen } from 'lucide-react';
 
 const compressImage = (file: File, maxWidth = 800, maxHeight = 800): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -135,8 +135,11 @@ export default function AdminDashboard() {
 
   const isAdmin = user?.email === 'masroficom@gmail.com';
 
+  const [articles, setArticles] = useState<any[]>([]);
+
   useEffect(() => {
     if (user && isAdmin) {
+      // existing listeners...
       const unsubContent = onSnapshot(doc(db, 'site_content', 'landing'), (docSnap) => {
         if (docSnap.exists()) {
           setSiteContent(docSnap.data());
@@ -158,56 +161,134 @@ export default function AdminDashboard() {
         if (!snapshot.empty) setTestimonials(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
         else setTestimonials([]);
       });
-      return () => { unsubContent(); unsubGames(); unsubPayments(); unsubFeatures(); unsubTestimonials(); };
+      const unsubArticles = onSnapshot(collection(db, 'articles'), (snapshot) => {
+        if (!snapshot.empty) setArticles(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+        else setArticles([]);
+      });
+      return () => { unsubContent(); unsubGames(); unsubPayments(); unsubFeatures(); unsubTestimonials(); unsubArticles(); };
     }
   }, [user]);
 
-  const handleLogin = async () => {
+  const addArticle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (e) {
-      console.error(e);
-      alert('Login failed. Ensure Firebase Auth is active.');
+      await addDoc(collection(db, 'articles'), { 
+        title: 'New Article', 
+        slug: 'new-article-' + Date.now(), 
+        content: 'Content goes here...', 
+        excerpt: 'Short description.', 
+        img: '', 
+        createdAt: new Date().toISOString() 
+      });
+      showSuccess('Artikel berhasil ditambahkan!');
+    } catch (e: any) {
+      showError('Gagal menambahkan artikel: ' + (e?.message || 'Error tidak diketahui'), e);
+    }
+  };
+  const updateArticle = async (id: string, field: string, val: string) => {
+    try {
+      await updateDoc(doc(db, 'articles', id), { [field]: val, updatedAt: new Date().toISOString() });
+    } catch (e: any) {
+      showError('Gagal memperbarui artikel: ' + (e?.message || 'Error tidak diketahui'), e);
+    }
+  };
+  const deleteArticle = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus artikel ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'articles', id));
+      showSuccess('Artikel berhasil dihapus!');
+    } catch (e: any) {
+      showError('Gagal menghapus artikel: ' + (e?.message || 'Error tidak diketahui'), e);
     }
   };
 
-  const handleSaveContent = async () => {
-    setIsSaving(true);
-    try {
-      await setDoc(doc(db, 'site_content', 'landing'), siteContent || {}, { merge: true });
-      showSuccess('Konten berhasil disimpan!');
-    } catch (e: any) {
-      if (e?.code === 'permission-denied') {
-        showError('Gagal menyimpan: Akses ditolak. Pastikan Anda memiliki hak akses admin.', e);
-      } else {
-        showError('Gagal menyimpan konten: ' + (e?.message || 'Error tidak diketahui'), e);
+  const seedSEOArticles = async () => {
+    if (!confirm('Ini akan menambahkan 6 artikel SEO ke database. Lanjutkan?')) return;
+    
+    const defaultArticles = [
+      {
+        title: "Panduan Lengkap Cara Top Up Mobile Legends Termurah dan Aman 2026",
+        slug: "panduan-top-up-ml",
+        excerpt: "Sedang mencari tempat top up diamond Mobile Legends yang murah, aman, dan tanpa ribet? Simak panduan lengkap kami.",
+        img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80",
+        content: `<h3>Top Up Diamond MLBB Termurah</h3>
+<p>Mobile Legends: Bang Bang (MLBB) masih menjadi salah satu game MOBA mobile terpopuler di Indonesia. Untuk bisa mendapatkan hero baru, skin idaman, hingga starlight member bulanan, pemain wajib memiliki Diamond sebagai mata uang dalam game.</p>
+<p>Namun, membedakan platform penyedia top-up yang aman dan ilegal kadang membingungkan. Terlebih maraknya penipuan di dunia maya. Dengan menggunakan VinzPedia, Anda dipastikan menikmati proses transaksi <strong>Top Up Mobile Legends yang 100% legal dan terpercaya</strong>.</p>
+<h4>Keuntungan Memilih Platform Bergaransi</h4>
+<p>Banyak pemain tergiur iming-iming diamond gratis dan ilegal, yang berujung pada akun terkena *banned* oleh pihak Moonton. Kami sangat menyarankan Anda selalu memilih agen resmi dan terpercaya. Apabila Anda juga ingin mempelajari bagaimana membangun usaha rintisan di bidang digital maupun meningkatkan keterampilan teknis Anda, jangan ragu untuk mengunjungi dan belajar bersama para pakar di <a href="https://lspdigital.id" target="_blank" rel="noreferrer">lspdigital.id</a>.</p>
+<p>Dengan hadirnya platform kami, tidak ada lagi proses lambat. Semua transaksi top-up ML dilakukan dalam hitungan detik. Cukup masukkan User ID dan Zone ID Anda, pilih nominal, bayar, dan diamond langsung masuk ke akun Anda saat itu juga!</p>`
+      },
+      {
+        title: "Trik Ampuh Mendapatkan Skin Epic FF Secara Legal dan Murah",
+        slug: "trik-skin-epic-ff",
+        excerpt: "Mau skin Free Fire terbaru tapi budget pas-pasan? Ini rahasianya agar Anda bisa tetap tampil keren di arena pertempuran.",
+        img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80",
+        content: `<h3>Tampil Keren di Free Fire Tanpa Menguras Dompet</h3>
+<p>Free Fire selalu mengadakan event-event menarik yang menghadirkan skin keren, bundle eksklusif, hingga pet dengan kemampuan spesial. Sayangnya, untuk bisa mengikuti event putaran (gacha) ini seringkali membutuhkan Diamond yang tidak sedikit.</p>
+<h4>Tips Top-up FF Super Hemat</h4>
+<p>Agar dana yang Anda keluarkan tidak membengkak, pastikan untuk memanfaatkan momen promo, diskon khusus event bulanan, serta bundel membership mingguan/bulanan. Membeli membership di platform kami dijamin lebih murah daripada pembelian reguler in-app. </p>
+<p>Sambil mengembangkan hobi gaming, jangan lupa untuk meningkatkan aset skill profesional Anda di ekosistem digital. Anda bisa temukan berbagai panduan sertifikasi digital di <a href="https://lspdigital.id" target="_blank" rel="noreferrer">lspdigital.id</a> yang bermanfaat. </p>
+<p>Di VinzPedia, keamanan transaksi Anda menjadi prioritas mutlak. Menggunakan jaringan transaksi ter-enkripsi membuat proses pembelian Diamond Free Fire berjalan lancar dan aman dari potensi ancaman siber apa pun. Jangan tertipu oleh harga miring penjual tidak resmi. Gunakan VinzPedia selalu!</p>`
+      },
+      {
+        title: "Daftar Harga UC PUBG Mobile Termurah Bulan Ini",
+        slug: "harga-uc-pubg-murah",
+        excerpt: "Klaim Royale Pass Season terbaru Anda hari ini. Cek rincian harga UC PUBG Mobile termurah dengan proses instan.",
+        img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80",
+        content: `<h3>Beli UC PUBG Mobile dengan Proses Kilat</h3>
+<p>Senjata yang diupgrade, pakaian eksklusif, dan kendaraan keren adalah beberapa keuntungan yang ditawarkan PUBG Mobile melalui sistem Royale Pass mereka. Unknown Cash (UC) adalah satu-satunya cara untuk membukanya.</p>
+<h4>Tabel Harga dan Kecepatan</h4>
+<p>Kami telah bermitra dengan penyedia metode pembayaran populer untuk memastikan kecepatan transaksi. Di VinzPedia, proses pembelian UC hanya memakan waktu 1-3 detik. Tidak perlu repot menunggu. Cukup masukan ID pemain PUBG Anda dan lakukan konfirmasi pembayaran.</p>
+<p>Meningkatnya industri esport membawa dampak positif bagi kemajuan teknologi dan edukasi digital lokal. Jika tertarik tentang kemajuan dunia digital dan sertifikasi profesi di bidang ini, <a href="https://lspdigital.id" target="_blank" rel="noreferrer">lspdigital.id</a> adalah referensial terbaik untuk Anda.</p>
+<p>Apapun mode permainan Anda, baik sekadar push rank atau bermain fun bersama teman, pastikan Anda mendapatkan suplai UC yang cukup di akun Anda. Raih Chicken Dinner Anda dengan penuh gaya hari ini!</p>`
+      },
+      {
+        title: "Cara Menghindari Penipuan Saat Top Up Game Online",
+        slug: "hindari-penipuan-top-up",
+        excerpt: "Penpulan online semakin marak. Yuk pahami cara-cara agar akun dan uang Anda aman saat beli voucher game.",
+        img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80",
+        content: `<h3>Bahaya Penipuan Top-Up Ilegal</h3>
+<p>Belakangan ini, industri game online digegerkan oleh banyaknya korban penipuan melalui layanan top-up game abal-abal di media sosial. Mereka menjanjikan jumlah in-game currency gila-gilaan dengan harga sangat murah, namun justru berujung pada pencurian akun (Phising).</p>
+<h4>Ciri-Ciri Platform Top Up Mengingatkan</h4>
+<p>Untuk mengamankan akun dari scammer, Anda harus meneliti: apakah website tersebut meminta kata sandi / password akun game Anda? Jika ya, tinggalkan segera! Platform top up resmi seperti VinzPedia <strong>hanya memerlukan User ID</strong> (dan Zone ID untuk beberapa game) untuk mengirimkan pesanan Anda.</p>
+<p>Mari jadikan internet sebagai tempat yang aman dan produktif. Sertifikasi digital dan pengetahuan IT dapat Anda pelajari lebih luas melalui jejaring <a href="https://lspdigital.id" target="_blank" rel="noreferrer">lspdigital.id</a>.</p>
+<p>Selalu perhatikan reputasi dan lisensi keamanan situs. VinzPedia dilengkapi dengan sertifikasi sekuritas enkripsi web serta payment gateway legal dan memiliki dukungan pelanggan yang siap melayani 24/7 jika terjadi kendala.</p>`
+      },
+      {
+        title: "Perbandingan Valorant Points (VP): Beli di Game vs Beli di Web",
+        slug: "perbandingan-vp-valorant",
+        excerpt: "Bingung mau beli Valorant Points dimana? Kami membedah perbedaannya dan menunjukkan cara mana yang menguntungkan.",
+        img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80",
+        content: `<h3>Mengapa Beli Valorant Point Lewat Web Pihak Ketiga Lebih Murah?</h3>
+<p>Sistem pembelian in-game (dari dalam game langsung) sering kali menambahkan biaya pajak yang besar dan biaya administrasi dari Google Play atau App Store. Oleh karena itu, pemain banyak mencari alternatif pembelian lewat website penyedia top-up.</p>
+<h4>Riot Games dan Keamanan Akun</h4>
+<p>Tidak usah khawatir dengan pemblokiran karena Riot Games memberikan dukungan ekosistem reseller resmi. Melalui metode Riot ID, Anda dapat mengisi VP secara sah dan masuk seketika itu juga ke inventory tanpa perlu login ke akun game Anda. Hal ini 100% didukung dan aman.</p>
+<p>Jika Anda tertarik dengan cara platform digital bekerja secara arsitektural dan legal, Anda bisa menemukan wawasan menarik dari <a href="https://lspdigital.id" target="_blank" rel="noreferrer">lspdigital.id</a>, yang banyak membahas validasi sistem digital.</p>
+<p>Nikmati kemeriahan Night.Market serta rilis bundle baru Valorant dengan harga miring! Jangan biarkan skin Vandal impian Anda hilang begitu saja dari store karena kurangnya VP harian. Top up sekarang di web kami!</p>`
+      },
+      {
+        title: "Mengenal Sistem Pity di Genshin Impact dan Cara Memanfaatkannya",
+        slug: "sistem-pity-genshin",
+        excerpt: "Pusing tidak kunjung dapat karakter bintang 5? Mari kenali sistem Pity Genshin Impact dan strategi top up Genesis Crystal yang efisien.",
+        img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80",
+        content: `<h3>Strategi Gacha dan Pity Rate</h3>
+<p>Di Genshin Impact, pemain sangat bergantung pada Primogems atau Genesis Crystal untuk melakukan 'Wish' guna mendapatkan karakter atau senjata bintang 5. Memahami sistem 'Pity'—dimana rate karakter bintang 5 dijamin muncul pada ke-90 kalinya—sangatlah vital untuk keuangan Anda.</p>
+<h4>Welkin Moon vs Genesis Crystal Instan</h4>
+<p>Bagi yang ingin menabung perlahan, Blessing of the Welkin Moon adalah sahabat terbaik. Namun jika banner karakter idaman tinggal menghitung hari dan Anda belum menyentuh 'soft pity' (pull ke-75), maka top up Genesis Crystal dalam jumlah besar menjadi jalan keluarnya.</p>
+<p>Bermain sangat seru, namun karir tetap nomor satu. Pastikan portofolio Anda terus bertambah nilainya di dunia kerja dengan mengikuti sertifikasi kompetensi bersama <a href="https://lspdigital.id" target="_blank" rel="noreferrer">lspdigital.id</a>.</p>
+<p>Kini Anda sudah mengetahui strategi pull yang tepat, siapkan simpanan Genesis Crystal Anda dengan berbelanja hemat di platform top-up kesayangan Anda. Dukungan berbagai macam dompet digital (E-wallet) di VinzPedia mempermudah setiap prosesnya.</p>`
       }
-    }
-    setIsSaving(false);
-  };
+    ];
 
-  const addGame = async () => {
     try {
-      await addDoc(collection(db, 'games'), { name: 'New Game', tags: 'Tags', img: '' });
-      showSuccess('Game berhasil ditambahkan!');
-    } catch (e: any) {
-      showError('Gagal menambahkan game: ' + (e?.message || 'Error tidak diketahui'), e);
-    }
-  };
-  const updateGame = async (id: string, field: string, val: string) => {
-    try {
-      await updateDoc(doc(db, 'games', id), { [field]: val });
-    } catch (e: any) {
-      showError('Gagal memperbarui game: ' + (e?.message || 'Error tidak diketahui'), e);
-    }
-  };
-  const deleteGame = async (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus game ini?')) return;
-    try {
-      await deleteDoc(doc(db, 'games', id));
-      showSuccess('Game berhasil dihapus!');
-    } catch (e: any) {
-      showError('Gagal menghapus game: ' + (e?.message || 'Error tidak diketahui'), e);
+       for (const art of defaultArticles) {
+         await addDoc(collection(db, 'articles'), {
+           ...art,
+           createdAt: new Date().toISOString()
+         });
+       }
+       showSuccess('6 Artikel SEO berhasil di-generate!');
+    } catch(e: any) {
+       showError('Gagal generate artikel', e);
     }
   };
 
@@ -354,6 +435,9 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('testimonials')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === 'testimonials' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-gray-400 hover:bg-white/5'}`}>
             <MessageSquare className="w-5 h-5" /> Testimoni
           </button>
+          <button onClick={() => setActiveTab('articles')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${activeTab === 'articles' ? 'bg-gold/10 text-gold border border-gold/20' : 'text-gray-400 hover:bg-white/5'}`}>
+            <BookOpen className="w-5 h-5" /> Artikel Blog / SEO
+          </button>
         </nav>
         <div className="p-4 border-t border-white/5">
           <button onClick={() => signOut(auth)} className="flex items-center gap-2 text-red-400 hover:text-red-300 w-full px-4 py-2">
@@ -396,8 +480,28 @@ export default function AdminDashboard() {
             {activeTab === 'general' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Nama Platform (Logo Header)</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">Nama Platform (Text Logo)</label>
                   <input type="text" value={siteContent?.header?.logoText || 'VINZPEDIA'} onChange={e => setSiteContent({ ...siteContent, header: { ...siteContent?.header, logoText: e.target.value }})} className="w-full bg-charcoal border border-white/10 rounded-lg px-4 py-2 text-white focus:border-gold outline-none" />
+                </div>
+                <div>
+                  <ImageInput 
+                    label="Image URL / Upload (Logo Web - Opsional)" 
+                    value={siteContent?.header?.logoImg} 
+                    onChange={(val: string) => setSiteContent({ ...siteContent, header: { ...siteContent?.header, logoImg: val }})} 
+                    maxWidth={400} 
+                    maxHeight={400} 
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">Jika diisi, gambar ini akan menggantikan text logo.</p>
+                </div>
+                <div>
+                  <ImageInput 
+                    label="Image URL / Upload (Favicon browser)" 
+                    value={siteContent?.header?.faviconImg} 
+                    onChange={(val: string) => setSiteContent({ ...siteContent, header: { ...siteContent?.header, faviconImg: val }})} 
+                    maxWidth={64} 
+                    maxHeight={64} 
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">Icon akan muncul di tab browser pengguna.</p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-400 mb-2">Footer Description</label>
@@ -527,7 +631,7 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       <div className="flex-shrink-0 flex items-center justify-center bg-black/50 rounded-lg overflow-hidden w-20 h-20 border border-white/10 mt-6 md:mt-0">
-                        {game.img ? <img src={game.img} alt="" className="w-full h-full object-cover" /> : <Gamepad2 className="w-8 h-8 text-white/20" />}
+                        {game.img ? <img src={game.img || undefined} alt="" className="w-full h-full object-cover" /> : <Gamepad2 className="w-8 h-8 text-white/20" />}
                       </div>
                       <button onClick={() => deleteGame(game.id)} className="text-red-400 hover:text-red-300 p-2 ml-auto md:ml-0"><Trash2 className="w-5 h-5" /></button>
                     </div>
@@ -562,7 +666,7 @@ export default function AdminDashboard() {
                       <div className="flex flex-col items-center gap-2">
                         {pm.img ? (
                           <div className="w-12 h-12 bg-white/5 rounded flex items-center justify-center p-1 border border-white/10">
-                            <img src={pm.img} alt="Logo" className="max-w-full max-h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            <img src={pm.img || undefined} alt="Logo" className="max-w-full max-h-full object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                           </div>
                         ) : (
                           <div className="w-12 h-12 bg-white/5 rounded flex items-center justify-center p-1 border border-white/10 text-[10px] text-gray-500 text-center leading-tight">
@@ -638,6 +742,59 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                         <button onClick={() => deleteTestimonial(testi.id)} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-5 h-5" /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'articles' && (
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <button onClick={addArticle} className="flex items-center gap-2 bg-gold text-charcoal px-4 py-2 rounded-lg font-bold hover:bg-yellow-500">
+                    <Plus className="w-4 h-4" /> Tambah Artikel
+                  </button>
+                  {articles.length === 0 && (
+                    <button onClick={seedSEOArticles} className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-indigo-500">
+                      Generate 6 SEO Articles
+                    </button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  {articles.map(art => (
+                    <div key={art.id} className="p-4 bg-charcoal border border-white/10 rounded-lg flex flex-col gap-3">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Judul Artikel</label>
+                              <input type="text" value={art.title || ''} onChange={(e) => updateArticle(art.id, 'title', e.target.value)} className="w-full bg-charcoal-light border border-white/10 rounded px-3 py-1.5 text-sm focus:border-gold outline-none" />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500 mb-1">Slug URL</label>
+                              <input type="text" value={art.slug || ''} onChange={(e) => updateArticle(art.id, 'slug', e.target.value)} className="w-full bg-charcoal-light border border-white/10 rounded px-3 py-1.5 text-sm focus:border-gold outline-none" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Ringkasan (Excerpt)</label>
+                            <textarea value={art.excerpt || ''} onChange={(e) => updateArticle(art.id, 'excerpt', e.target.value)} className="w-full bg-charcoal-light border border-white/10 rounded px-3 py-1.5 text-sm focus:border-gold outline-none h-16" />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-gray-500 mb-1">Isi Konten (HTML / Markdown)</label>
+                            <textarea value={art.content || ''} onChange={(e) => updateArticle(art.id, 'content', e.target.value)} className="w-full bg-charcoal-light border border-white/10 rounded px-3 py-1.5 text-sm focus:border-gold outline-none h-40 font-mono" />
+                          </div>
+                          <div>
+                            <ImageInput 
+                              label="Banner Image URL / Upload" 
+                              value={art.img} 
+                              onChange={(val: string) => updateArticle(art.id, 'img', val)} 
+                              maxWidth={1200} 
+                              maxHeight={630} 
+                            />
+                          </div>
+                        </div>
+                        <button onClick={() => deleteArticle(art.id)} className="text-red-400 hover:text-red-300 p-1 mt-6"><Trash2 className="w-5 h-5" /></button>
                       </div>
                     </div>
                   ))}

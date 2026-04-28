@@ -83,6 +83,21 @@
       },
       "required": ["email", "displayName", "role", "createdAt", "updatedAt"]
     },
+    "Article": {
+      "title": "Article",
+      "description": "SEO article for the blog",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "slug": { "type": "string" },
+        "content": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "img": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "slug", "content", "createdAt"]
+    },
     "LandingPageContent": {
       "title": "LandingPageContent",
       "description": "Complete content for the landing page",
@@ -123,6 +138,10 @@
     "users/{userId}": {
       "schema": "#/entities/UserProfile",
       "description": "User profiles"
+    },
+    "articles/{articleId}": {
+      "schema": "#/entities/Article",
+      "description": "Articles for the blog"
     }
   }
 }

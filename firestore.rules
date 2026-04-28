@@ -50,6 +50,11 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin() && isValidId(methodId);
     }
     
+    match /articles/{articleId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin() && isValidId(articleId);
+    }
+    
     match /users/{userId} {
       allow read: if isSignedIn() && (request.auth.uid == userId);
       allow create: if isSignedIn() && request.auth.uid == userId 

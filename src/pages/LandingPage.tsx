@@ -116,6 +116,15 @@ export default function LandingPage() {
   const socialFb = siteContent?.footer?.socialFb || '#';
   const socialTt = siteContent?.footer?.socialTt || '#';
 
+  const handleGameClick = (gameName: string) => {
+    const text = encodeURIComponent(`Halo Admin ${logoText}, saya ingin order top-up game ${gameName}`);
+    let phoneNum = footerPhone.replace(/[^0-9]/g, '');
+    if (phoneNum.startsWith('0')) {
+      phoneNum = '62' + phoneNum.slice(1);
+    }
+    window.open(`https://wa.me/${phoneNum}?text=${text}`, '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-[#111111] text-white font-sans overflow-x-hidden selection:bg-gold selection:text-charcoal flex flex-col scroll-smooth">
       
@@ -125,28 +134,29 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-20">
             {/* Logo area */}
             <Link to="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
-              <img src="/logo.jpg" alt="Vinz Pedia Logo" className="h-10 w-auto object-contain fallback-logo" onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-              }} />
-              <div className="hidden flex items-center gap-3 fallback-text-logo">
-                <div className="w-10 h-10 bg-gradient-to-br from-gold to-yellow-600 rounded flex items-center justify-center shadow-[0_0_15px_rgba(255,215,0,0.3)] group-hover:scale-105 transition-transform duration-300">
-                  <span className="text-charcoal font-black text-xl leading-none tracking-tighter">V</span>
+              {siteContent?.header?.logoImg ? (
+                <img src={siteContent.header.logoImg} alt={logoText} className="h-10 w-auto object-contain" />
+              ) : (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-gold to-yellow-600 rounded flex items-center justify-center shadow-[0_0_15px_rgba(255,215,0,0.3)] group-hover:scale-105 transition-transform duration-300">
+                    <span className="text-charcoal font-black text-xl leading-none tracking-tighter">V</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-heading font-black text-2xl tracking-tight leading-none text-white uppercase group-hover:drop-shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all">
+                      {headerPrefix}<span className="text-gold">{headerSuffix}</span>
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="font-heading font-black text-2xl tracking-tight leading-none text-white uppercase group-hover:drop-shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all">
-                    {headerPrefix}<span className="text-gold">{headerSuffix}</span>
-                  </span>
-                </div>
-              </div>
+              )}
             </Link>
 
             {/* Navigasi Utama Desktop */}
             <div className="hidden lg:flex items-center gap-8">
-              <a href="#" className="font-bold text-white hover:text-gold transition-colors text-sm uppercase tracking-wider">Beranda</a>
-              <a href="#games" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Kategori Game</a>
-              <a href="#manfaat" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Keunggulan</a>
-              <a href="#testimoni" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Testimoni</a>
+              <a href="/#" className="font-bold text-white hover:text-gold transition-colors text-sm uppercase tracking-wider">Beranda</a>
+              <a href="/#games" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Kategori Game</a>
+              <a href="/#manfaat" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Keunggulan</a>
+              <a href="/#testimoni" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Testimoni</a>
+              <Link to="/blog" className="font-bold text-gray-300 hover:text-gold transition-colors text-sm uppercase tracking-wider">Blog</Link>
             </div>
 
             {/* Right section */}
@@ -189,10 +199,11 @@ export default function LandingPage() {
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-[#1A1A1A] border-b border-white/5 absolute w-full left-0 origin-top animate-in slide-in-from-top-4 duration-300">
             <div className="px-4 py-6 space-y-4 shadow-2xl flex flex-col">
-              <a href="#" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Beranda</a>
-              <a href="#games" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Kategori Game</a>
-              <a href="#manfaat" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Keunggulan Kami</a>
-              <a href="#testimoni" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Testimoni Pengguna</a>
+              <a href="/#" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Beranda</a>
+              <a href="/#games" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Kategori Game</a>
+              <a href="/#manfaat" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Keunggulan Kami</a>
+              <a href="/#testimoni" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm">Testimoni Pengguna</a>
+              <Link to="/blog" onClick={() => setIsMobileMenuOpen(false)} className="text-white font-bold p-3 hover:bg-white/5 rounded-lg uppercase tracking-wider text-sm text-gold">Blog Kami</Link>
               <hr className="border-white/10 my-2" />
               {user ? (
                 <>
@@ -280,7 +291,7 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-gold/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"></div>
                 
                 <img 
-                  src={heroImageSrc} 
+                  src={heroImageSrc || undefined} 
                   alt="Gaming Banner" 
                   className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.03] z-10 relative opacity-90 group-hover:opacity-100"
                   onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80'; }}
@@ -332,12 +343,13 @@ export default function LandingPage() {
               {games.map((game) => (
                 <div 
                   key={game.id} 
+                  onClick={() => handleGameClick(game.name)}
                   className="bg-[#222222] rounded-3xl p-3 sm:p-4 border border-white/5 hover:border-gold/50 cursor-pointer group flex flex-col items-center gap-4 transition-all duration-300 hover:shadow-[0_15px_40px_rgba(0,0,0,0.6)] hover:-translate-y-2 relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                   <div className="w-full aspect-square bg-[#1A1A1A] rounded-2xl overflow-hidden relative shadow-inner">
                     <img 
-                      src={game.img} 
+                      src={game.img || undefined} 
                       alt={game.name} 
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"
@@ -471,18 +483,18 @@ export default function LandingPage() {
             {/* Brand & Description */}
             <div className="md:col-span-12 lg:col-span-5 space-y-6">
               <Link to="/" className="flex items-center gap-2 cursor-pointer inline-block">
-                <img src="/logo.jpg" alt="Vinz Pedia Logo" className="h-12 w-auto object-contain fallback-logo" onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                }} />
-                <div className="hidden flex items-center gap-3 fallback-text-logo">
-                  <div className="w-12 h-12 bg-gradient-to-br from-gold to-yellow-600 rounded-xl flex items-center justify-center">
-                    <span className="text-charcoal font-black text-3xl leading-none tracking-tighter">V</span>
+                {siteContent?.header?.logoImg ? (
+                  <img src={siteContent.header.logoImg} alt={logoText} className="h-12 w-auto object-contain" />
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-gold to-yellow-600 rounded-xl flex items-center justify-center">
+                      <span className="text-charcoal font-black text-3xl leading-none tracking-tighter">V</span>
+                    </div>
+                    <span className="font-heading font-black text-3xl tracking-tight leading-none text-white uppercase drop-shadow-md">
+                      {headerPrefix}<span className="text-gold">{headerSuffix}</span>
+                    </span>
                   </div>
-                  <span className="font-heading font-black text-3xl tracking-tight leading-none text-white uppercase drop-shadow-md">
-                    {headerPrefix}<span className="text-gold">{headerSuffix}</span>
-                  </span>
-                </div>
+                )}
               </Link>
               
               <p className="text-gray-400 text-base leading-relaxed pr-8">
@@ -496,7 +508,7 @@ export default function LandingPage() {
                     <div key={payment.id || idx} className="h-10 px-4 bg-white/5 rounded-xl text-sm font-bold border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/10 hover:border-gold/30 transition-all overflow-hidden group cursor-default">
                       {payment.img ? (
                         <img 
-                          src={payment.img} 
+                          src={payment.img || undefined} 
                           alt={payment.name} 
                           title={payment.name}
                           className="h-6 object-contain group-hover:scale-110 transition-transform duration-300" 
