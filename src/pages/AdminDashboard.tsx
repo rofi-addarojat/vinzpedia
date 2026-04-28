@@ -31,7 +31,7 @@ const compressImage = (file: File, maxWidth = 800, maxHeight = 800): Promise<str
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/webp', 0.8));
+        resolve(canvas.toDataURL('image/png'));
       };
       img.onerror = (err) => reject(err);
     };
@@ -543,6 +543,11 @@ export default function AdminDashboard() {
                     maxHeight={400} 
                   />
                   <p className="text-[10px] text-gray-500 mt-1">Jika diisi, gambar ini akan menggantikan text logo.</p>
+                  {siteContent?.header?.logoImg && (
+                    <div className="mt-2 p-2 bg-[#1A1A1A] rounded inline-block">
+                       <img src={siteContent.header.logoImg} alt="Logo" className="h-8 object-contain" />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <ImageInput 
@@ -553,6 +558,11 @@ export default function AdminDashboard() {
                     maxHeight={64} 
                   />
                   <p className="text-[10px] text-gray-500 mt-1">Icon akan muncul di tab browser pengguna.</p>
+                  {siteContent?.header?.faviconImg && (
+                    <div className="mt-2 p-2 bg-[#1A1A1A] rounded inline-block">
+                       <img src={siteContent.header.faviconImg} alt="Favicon" className="h-4 object-contain" />
+                    </div>
+                  )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-400 mb-2">Footer Description</label>
